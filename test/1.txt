@@ -1,0 +1,94 @@
+import requests
+import json
+from datetime import datetime
+
+# ==================================================================================================
+
+# start_time = datetime.now()
+
+inn_list = ['1660298515', '1656024913', '1660210119']
+
+for inn in inn_list:
+    headers = {
+        'X-KL-Ajax-Request': 'Ajax_Request',
+        'Pragma': 'no-cache',
+        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+        'DNT': '1',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Cache-Control': 'no-cache',
+        'Referer': f'https://fedresurs.ru/search/entity?code={inn}',
+        'sec-ch-ua-platform': '"Windows"',
+    }
+
+    params = {
+        'limit': '15',
+        'offset': '0',
+        'code': f'{inn}',
+        'isActive': 'true',
+    }
+
+    response = requests.get('https://fedresurs.ru/backend/companies', params=params, headers=headers)
+    # convert to json
+    data_json = json.loads(response.text)
+    guid = data_json['pageData'][0]['guid']
+
+    headers = {
+        'X-KL-Ajax-Request': 'Ajax_Request',
+        'Pragma': 'no-cache',
+        'sec-ch-ua': '"Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"',
+        'DNT': '1',
+        'sec-ch-ua-mobile': '?0',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Cache-Control': 'no-cache',
+        'Referer': f'https://fedresurs.ru/company/{guid}',
+        'sec-ch-ua-platform': '"Windows"',
+    }
+
+    params = {
+        'limit': '15',
+        'offset': '0',
+        'searchCompanyEfrsb': 'true',
+        'searchAmReport': 'true',
+        'searchFirmBankruptMessage': 'true',
+        'searchFirmBankruptMessageWithoutLegalCase': 'false',
+        'searchSfactsMessage': 'true',
+        'searchSroAmMessage': 'true',
+        'searchTradeOrgMessage': 'true',
+    }
+
+    response = requests.get(
+        f'https://fedresurs.ru/backend/companies/{guid}/publications',
+        params=params,
+        headers=headers,
+    )
+
+    data_json = json.loads(response.text)
+
+    company_amount = len(data_json['pageData'])
+
+    if company_amount > 0:
+        # all company orders
+        for company in range(0, company_amount):
+            guid = data_json['pageData'][company]['title']
+            print(guid)
+        print("\n==========================\n")
+
+# end_time = datetime.now()
+
+# exec_time = end_time - start_time // 2.344 sec
+
+# print(exec_time)
+
+# def print_hi(name):
+#     # Use a breakpoint in the code line below to debug your script.
+#     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+#
+#
+# if __name__ == "__main__":
+#     print(f'Hi, PyCharm!')
+
+
+
